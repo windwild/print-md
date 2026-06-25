@@ -148,6 +148,8 @@ install_app() {
 }
 
 case "$MODE" in
+  --bundle|bundle)
+    ;;
   run)
     open_app
     ;;
@@ -172,7 +174,7 @@ case "$MODE" in
     /usr/bin/open -n "$INSTALL_BUNDLE"
     ;;
   *)
-    echo "usage: $0 [run|--debug|--logs|--telemetry|--verify|--install]" >&2
+    echo "usage: $0 [run|--bundle|--debug|--logs|--telemetry|--verify|--install]" >&2
     exit 2
     ;;
 esac
