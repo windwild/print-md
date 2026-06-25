@@ -4,6 +4,8 @@ PrintMD 是一个原生 macOS Markdown 打印预览工具。它专注于把 Mark
 
 PrintMD is a native macOS Markdown print preview app. It focuses on turning Markdown documents into paper-like previews with theme, font size, pagination, and print-mode controls.
 
+<img src="Assets/screenshot.png" alt="PrintMD screenshot" width="960">
+
 ## 中文
 
 ### 功能
