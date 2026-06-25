@@ -14,6 +14,7 @@ VERSION="${1:-${APP_VERSION:-}}"
 APP_STORE_SIGN_IDENTITY="${APP_STORE_SIGN_IDENTITY:-}"
 INSTALLER_SIGN_IDENTITY="${INSTALLER_SIGN_IDENTITY:-}"
 PROVISIONING_PROFILE="${PROVISIONING_PROFILE:-}"
+CODESIGN_TIMESTAMP="${CODESIGN_TIMESTAMP:-0}"
 
 usage() {
   cat >&2 <<USAGE
@@ -73,7 +74,12 @@ APP_VERSION="$VERSION" BUILD_CONFIGURATION=release "$ROOT_DIR/script/build_and_r
 
 cp "$PROVISIONING_PROFILE" "$APP_CONTENTS/embedded.provisionprofile"
 
-codesign --force --deep --options runtime --timestamp \
+codesign_args=(--force --deep --options runtime)
+if [ "$CODESIGN_TIMESTAMP" = "1" ]; then
+  codesign_args+=(--timestamp)
+fi
+
+codesign "${codesign_args[@]}" \
   --entitlements "$ENTITLEMENTS" \
   --sign "$APP_STORE_SIGN_IDENTITY" \
   "$APP_BUNDLE"
