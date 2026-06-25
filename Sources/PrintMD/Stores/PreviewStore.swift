@@ -88,7 +88,7 @@ final class PreviewStore: ObservableObject {
     }
 
     func openMarkdown(from url: URL) {
-        let fileURL = url.standardizedFileURL
+        let fileURL = FileURLResolver.filePathURL(from: url)
         guard MarkdownFileType.isSupported(fileURL) else {
             errorMessage = "\(fileURL.lastPathComponent) 不是支持的 Markdown 文件。"
             statusMessage = "只支持 Markdown 文件"
@@ -187,6 +187,13 @@ final class PreviewStore: ObservableObject {
             pageSize: pageSize,
             printMode: printMode
         )
+    }
+}
+
+enum FileURLResolver {
+    static func filePathURL(from url: URL) -> URL {
+        let pathURL = (url as NSURL).filePathURL as URL? ?? url
+        return pathURL.standardizedFileURL
     }
 }
 

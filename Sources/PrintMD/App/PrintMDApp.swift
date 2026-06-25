@@ -17,6 +17,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sender.reply(toOpenOrPrint: .success)
     }
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        enqueueOpenFiles(urls)
+    }
+
     private func enqueueOpenFiles(_ urls: [URL]) {
         Task { @MainActor in
             ExternalFileOpenCoordinator.shared.open(urls)
@@ -37,6 +41,9 @@ struct PrintMDApp: App {
                     ExternalFileOpenCoordinator.shared.installHandler { [weak store] url in
                         store?.openMarkdown(from: url)
                     }
+                }
+                .onOpenURL { url in
+                    store.openMarkdown(from: url)
                 }
         }
         .defaultSize(width: 1120, height: 860)

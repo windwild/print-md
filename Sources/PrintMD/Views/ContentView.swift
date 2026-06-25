@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -25,7 +26,7 @@ struct ContentView: View {
                 }
             }
         }
-        .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil, perform: handleFileDrop)
+        .onDrop(of: FileDropDecoder.supportedTypeIdentifiers, isTargeted: nil, perform: handleFileDrop)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {
@@ -134,19 +135,21 @@ struct ContentView: View {
     }
 
     private func handleFileDrop(_ providers: [NSItemProvider]) -> Bool {
-        guard let provider = providers.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) }) else {
-            return false
-        }
+        for provider in providers {
+            for typeIdentifier in FileDropDecoder.supportedTypeIdentifiers where provider.hasItemConformingToTypeIdentifier(typeIdentifier) {
+                provider.loadItem(forTypeIdentifier: typeIdentifier, options: nil) { item, _ in
+                    guard let url = FileDropDecoder.urls(from: item).first else { return }
 
-        provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
-            guard let url = FileDropDecoder.url(from: item) else { return }
+                    Task { @MainActor in
+                        store.openMarkdown(from: url)
+                    }
+                }
 
-            Task { @MainActor in
-                store.openMarkdown(from: url)
+                return true
             }
         }
 
-        return true
+        return false
     }
 
     private var header: some View {
@@ -209,39 +212,64 @@ struct ContentView: View {
 }
 
 private enum FileDropDecoder {
-    static func url(from item: NSSecureCoding?) -> URL? {
+    static let supportedTypeIdentifiers = [
+        UTType.fileURL.identifier,
+        UTType.url.identifier,
+        NSPasteboard.PasteboardType.fileURL.rawValue,
+        NSPasteboard.PasteboardType.URL.rawValue,
+        "NSFilenamesPboardType",
+        UTType.plainText.identifier
+    ]
+
+    static func urls(from item: NSSecureCoding?) -> [URL] {
         if let url = item as? URL {
-            return url
+            return [FileURLResolver.filePathURL(from: url)]
         }
 
         if let url = item as? NSURL {
-            return url as URL
+            return [FileURLResolver.filePathURL(from: url as URL)]
+        }
+
+        if let paths = item as? [String] {
+            return paths.map { URL(fileURLWithPath: $0) }
+        }
+
+        if let array = item as? NSArray {
+            let paths = array.compactMap { $0 as? String }
+            if !paths.isEmpty {
+                return paths.map { URL(fileURLWithPath: $0) }
+            }
         }
 
         if let data = item as? Data {
             if let url = URL(dataRepresentation: data, relativeTo: nil) {
-                return url
+                return [FileURLResolver.filePathURL(from: url)]
             }
 
             if let string = String(data: data, encoding: .utf8) {
-                return url(from: string)
+                return urls(from: string)
             }
         }
 
         if let string = item as? String {
-            return url(from: string)
+            return urls(from: string)
         }
 
-        return nil
+        return []
     }
 
-    private static func url(from string: String) -> URL? {
-        let trimmedString = string.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let url = URL(string: trimmedString), url.isFileURL {
-            return url
-        }
+    private static func urls(from string: String) -> [URL] {
+        let lines = string
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
 
-        guard !trimmedString.isEmpty else { return nil }
-        return URL(fileURLWithPath: trimmedString)
+        return lines.compactMap { line in
+            if let url = URL(string: line), url.isFileURL {
+                return FileURLResolver.filePathURL(from: url)
+            }
+
+            return URL(fileURLWithPath: line)
+        }
     }
 }
