@@ -3,7 +3,7 @@ set -euo pipefail
 
 MODE="${1:-run}"
 APP_NAME="PrintMD"
-BUNDLE_ID="com.windwild.PrintMD"
+BUNDLE_ID="com.wwgao.printmd"
 MIN_SYSTEM_VERSION="14.0"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 
@@ -127,6 +127,8 @@ cat >"$INFO_PLIST" <<PLIST
 </dict>
 </plist>
 PLIST
+
+codesign --force --deep --sign - "$APP_BUNDLE" >/dev/null 2>&1
 
 register_app() {
   local bundle_path="$1"
