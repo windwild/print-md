@@ -1,0 +1,29 @@
+/* Load this file with Open CSS Theme to test custom print styling. */
+
+:root {
+  --body-font: Charter, Georgia, "Times New Roman", "Songti SC", serif;
+  --body-text: #1e2430;
+  --sheet-background: #ffffff;
+  --preview-background: #d5dbe2;
+  --rule-color: #d4dbe4;
+  --strong-rule-color: #9dacbc;
+  --table-header-background: #eef3f8;
+  --table-row-alt-background: #fbfcfd;
+  --blockquote-background: #f6f8fb;
+  --heading-color: #143d63;
+  --link-color: #17639b;
+}
+
+.markdown-body {
+  line-height: 1.64;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  color: #123b5d;
+}
+
+.markdown-body blockquote {
+  background: #f7f0df;
+  padding: 0.7em 1em;
+}
