@@ -64,6 +64,7 @@ require_command codesign
 require_command ditto
 require_command productbuild
 require_command pkgutil
+require_command xattr
 
 cd "$ROOT_DIR"
 
@@ -73,6 +74,7 @@ mkdir -p "$APP_STORE_DIR"
 APP_VERSION="$VERSION" BUILD_CONFIGURATION=release "$ROOT_DIR/script/build_and_run.sh" --bundle
 
 cp "$PROVISIONING_PROFILE" "$APP_CONTENTS/embedded.provisionprofile"
+xattr -cr "$APP_BUNDLE"
 
 codesign_args=(--force --deep --options runtime)
 if [ "$CODESIGN_TIMESTAMP" = "1" ]; then
