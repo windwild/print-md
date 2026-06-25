@@ -6,6 +6,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
     }
+
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        enqueueOpenFiles([URL(fileURLWithPath: filename)])
+        return true
+    }
+
+    func application(_ sender: NSApplication, openFiles filenames: [String]) {
+        enqueueOpenFiles(filenames.map { URL(fileURLWithPath: $0) })
+        sender.reply(toOpenOrPrint: .success)
+    }
+
+    private func enqueueOpenFiles(_ urls: [URL]) {
+        Task { @MainActor in
+            ExternalFileOpenCoordinator.shared.open(urls)
+        }
+    }
 }
 
 @main
@@ -17,6 +33,11 @@ struct PrintMDApp: App {
         WindowGroup("PrintMD") {
             ContentView(store: store)
                 .frame(minWidth: 980, minHeight: 720)
+                .onAppear { [store] in
+                    ExternalFileOpenCoordinator.shared.installHandler { [weak store] url in
+                        store?.openMarkdown(from: url)
+                    }
+                }
         }
         .defaultSize(width: 1120, height: 860)
         .commands {

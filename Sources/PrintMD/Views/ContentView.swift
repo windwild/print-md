@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @ObservedObject var store: PreviewStore
@@ -24,6 +25,7 @@ struct ContentView: View {
                 }
             }
         }
+        .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil, perform: handleFileDrop)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {
@@ -131,6 +133,22 @@ struct ContentView: View {
         }
     }
 
+    private func handleFileDrop(_ providers: [NSItemProvider]) -> Bool {
+        guard let provider = providers.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) }) else {
+            return false
+        }
+
+        provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
+            guard let url = FileDropDecoder.url(from: item) else { return }
+
+            Task { @MainActor in
+                store.openMarkdown(from: url)
+            }
+        }
+
+        return true
+    }
+
     private var header: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
@@ -187,5 +205,43 @@ struct ContentView: View {
                 .stroke(.separator, lineWidth: 1)
         )
         .padding(.horizontal, 18)
+    }
+}
+
+private enum FileDropDecoder {
+    static func url(from item: NSSecureCoding?) -> URL? {
+        if let url = item as? URL {
+            return url
+        }
+
+        if let url = item as? NSURL {
+            return url as URL
+        }
+
+        if let data = item as? Data {
+            if let url = URL(dataRepresentation: data, relativeTo: nil) {
+                return url
+            }
+
+            if let string = String(data: data, encoding: .utf8) {
+                return url(from: string)
+            }
+        }
+
+        if let string = item as? String {
+            return url(from: string)
+        }
+
+        return nil
+    }
+
+    private static func url(from string: String) -> URL? {
+        let trimmedString = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let url = URL(string: trimmedString), url.isFileURL {
+            return url
+        }
+
+        guard !trimmedString.isEmpty else { return nil }
+        return URL(fileURLWithPath: trimmedString)
     }
 }

@@ -32,6 +32,12 @@ PrintMD is a native macOS Markdown print preview app. It focuses on turning Mark
 ./script/build_and_run.sh --verify
 ```
 
+安装到 `/Applications` 并注册为 Markdown 文件的打开方式：
+
+```bash
+./script/build_and_run.sh --install
+```
+
 单独构建 SwiftPM 目标：
 
 ```bash
@@ -79,6 +85,12 @@ Verify build and launch:
 
 ```bash
 ./script/build_and_run.sh --verify
+```
+
+Install to `/Applications` and register as an opener for Markdown files:
+
+```bash
+./script/build_and_run.sh --install
 ```
 
 Build the SwiftPM target only:

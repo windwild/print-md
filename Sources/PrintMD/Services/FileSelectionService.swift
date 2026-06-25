@@ -6,11 +6,8 @@ enum FileSelectionService {
         chooseFile(
             title: "打开 Markdown 文件",
             prompt: "打开",
-            contentTypes: [
-                UTType(filenameExtension: "md"),
-                UTType(filenameExtension: "markdown"),
-                .plainText
-            ].compactMap { $0 }
+            contentTypes: MarkdownFileType.supportedExtensions
+                .compactMap { UTType(filenameExtension: $0) } + [.plainText]
         )
     }
 

@@ -84,7 +84,18 @@ final class PreviewStore: ObservableObject {
 
     func openMarkdown() {
         guard let url = FileSelectionService.chooseMarkdownFile() else { return }
-        loadMarkdown(from: url)
+        openMarkdown(from: url)
+    }
+
+    func openMarkdown(from url: URL) {
+        let fileURL = url.standardizedFileURL
+        guard MarkdownFileType.isSupported(fileURL) else {
+            errorMessage = "\(fileURL.lastPathComponent) 不是支持的 Markdown 文件。"
+            statusMessage = "只支持 Markdown 文件"
+            return
+        }
+
+        loadMarkdown(from: fileURL)
     }
 
     func openStyleSheet() {
@@ -176,6 +187,14 @@ final class PreviewStore: ObservableObject {
             pageSize: pageSize,
             printMode: printMode
         )
+    }
+}
+
+enum MarkdownFileType {
+    static let supportedExtensions: Set<String> = ["md", "markdown", "mdown", "mkd", "mkdn"]
+
+    static func isSupported(_ url: URL) -> Bool {
+        supportedExtensions.contains(url.pathExtension.lowercased())
     }
 }
 
