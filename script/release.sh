@@ -62,7 +62,7 @@ cd "$ROOT_DIR"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 
-APP_VERSION="$VERSION" "$ROOT_DIR/script/build_and_run.sh" --bundle
+APP_VERSION="$VERSION" BUILD_CONFIGURATION=release "$ROOT_DIR/script/build_and_run.sh" --bundle
 
 codesign --force --deep --options runtime --timestamp \
   --sign "$SIGN_IDENTITY" \

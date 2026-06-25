@@ -6,6 +6,7 @@ APP_NAME="PrintMD"
 BUNDLE_ID="com.wwgao.printmd"
 MIN_SYSTEM_VERSION="14.0"
 APP_VERSION="${APP_VERSION:-0.1.0}"
+BUILD_CONFIGURATION="${BUILD_CONFIGURATION:-debug}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
@@ -23,8 +24,21 @@ cd "$ROOT_DIR"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
-swift build
-BUILD_DIR="$(swift build --show-bin-path)"
+case "$BUILD_CONFIGURATION" in
+  debug)
+    SWIFT_BUILD_FLAGS=()
+    ;;
+  release)
+    SWIFT_BUILD_FLAGS=(-c release)
+    ;;
+  *)
+    echo "BUILD_CONFIGURATION must be debug or release" >&2
+    exit 2
+    ;;
+esac
+
+swift build "${SWIFT_BUILD_FLAGS[@]}"
+BUILD_DIR="$(swift build "${SWIFT_BUILD_FLAGS[@]}" --show-bin-path)"
 BUILD_BINARY="$BUILD_DIR/$APP_NAME"
 
 rm -rf "$APP_BUNDLE"
