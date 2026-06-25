@@ -53,57 +53,6 @@ pre, code {}
 blockquote {}
 ```
 
-### 发布 Release
-
-公开发布建议使用 Developer ID 签名和 Apple notarization。没有签名的压缩包也能用于个人测试，但其他用户下载后可能需要右键打开，或被 Gatekeeper 拦截。
-
-1. 设置版本并构建 app：
-
-```bash
-APP_VERSION=0.1.0 ./script/build_and_run.sh --verify
-```
-
-2. 可选：用 Developer ID 签名：
-
-```bash
-codesign --force --deep --options runtime \
-  --sign "Developer ID Application: Your Name (TEAMID)" \
-  dist/PrintMD.app
-```
-
-3. 可选：提交 notarization 并 stapling：
-
-```bash
-xcrun notarytool submit dist/PrintMD.app \
-  --apple-id "you@example.com" \
-  --team-id "TEAMID" \
-  --password "app-specific-password" \
-  --wait
-
-xcrun stapler staple dist/PrintMD.app
-```
-
-4. 打包 app：
-
-```bash
-ditto -c -k --keepParent dist/PrintMD.app dist/PrintMD-v0.1.0-macos.zip
-```
-
-5. 打标签并推送：
-
-```bash
-git tag v0.1.0
-git push origin main --tags
-```
-
-6. 创建 GitHub Release：
-
-```bash
-gh release create v0.1.0 dist/PrintMD-v0.1.0-macos.zip \
-  --title "PrintMD v0.1.0" \
-  --notes "Initial public release."
-```
-
 ## English
 
 ### Features
@@ -151,57 +100,6 @@ p, li {}
 table, th, td {}
 pre, code {}
 blockquote {}
-```
-
-### Release
-
-For public distribution, use Developer ID signing and Apple notarization. An unsigned zip can work for personal testing, but other users may need to right-click open it or may be blocked by Gatekeeper.
-
-1. Set the version and build the app:
-
-```bash
-APP_VERSION=0.1.0 ./script/build_and_run.sh --verify
-```
-
-2. Optional: sign with Developer ID:
-
-```bash
-codesign --force --deep --options runtime \
-  --sign "Developer ID Application: Your Name (TEAMID)" \
-  dist/PrintMD.app
-```
-
-3. Optional: notarize and staple:
-
-```bash
-xcrun notarytool submit dist/PrintMD.app \
-  --apple-id "you@example.com" \
-  --team-id "TEAMID" \
-  --password "app-specific-password" \
-  --wait
-
-xcrun stapler staple dist/PrintMD.app
-```
-
-4. Package the app:
-
-```bash
-ditto -c -k --keepParent dist/PrintMD.app dist/PrintMD-v0.1.0-macos.zip
-```
-
-5. Tag and push:
-
-```bash
-git tag v0.1.0
-git push origin main --tags
-```
-
-6. Create the GitHub Release:
-
-```bash
-gh release create v0.1.0 dist/PrintMD-v0.1.0-macos.zip \
-  --title "PrintMD v0.1.0" \
-  --notes "Initial public release."
 ```
 
 ## Open Source Components
